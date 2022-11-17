@@ -2,7 +2,7 @@
 % Please edit documentation in R/icjmsim.R
 \name{icjmsim}
 \alias{icjmsim}
-\title{A simulation Function based on ICJM fitted on PASS data}
+\title{A simulation function based on ICJM fitted on PASS data}
 \usage{
 icjmsim(
   n = 1000,
@@ -29,30 +29,46 @@ icjmsim(
 
 \item{seed}{seed value for reproducibility The default value is 100.}
 
-\item{param_list}{the estimated parameters from the PASS data and the fitted ICJM:
-\code{t.max}: maximum follow-up time in the PASS data;
-\code{mean.Cens}: mean censoring time in the PASS data;
-\code{knot.longi}: knots used in the natural cubic spline specification of the longitudinal model;
-\code{knot.surv}: knots used in the P-splines of the baseline hazard in the survival model;
-\code{betas}: coefficients for the fixed effects in the longitudinal submodel for PSA;
-\code{sigma.y}: the standard deviation for the residuals in the longitudinal submodel for PSA;
-\code{D_c3}: the covariance matrix for the random effects in the longitudinal submodel for PSA;
-\code{gambh}: coefficients for the P-spline design matrix of the baseline hazard in the survival submodel;
-\code{gammas}: coefficients for the exogenous covariates in the survival submodel;
-\code{alpha}: coefficients for the impact from PSA on the time-to-event outcomes in the survival submodel;
-\code{age.mean}: mean age observed in the PASS data (centered around 62);
-\code{age.sd}: standard deviation of age observed in the PASS data;
-\code{density.mean}: mean of the PSA density (in log) observed in the PASS data;
-\code{density.sd}: standard deviation of the PSA density (in log) observed in the PASS data;
-\code{cvisit.sep}: regular clinical visit interval for PSA measurement. The default is 3 months (0.25 years);
-\code{cvisit.sd}: standard deviation of variation in the clinical visit time.}
+\item{param_list}{the estimated parameters from the PASS data and the fitted ICJM:}
 
 \item{Pcomp}{the compliance rate of PSA measurements. The default value is 100%.}
 
 \item{Bcomp}{the compliance rate of biopsies. The default value is 100%.}
+
+\item{\code{t.max}:}{maximum follow-up time in the PASS data;}
+
+\item{\code{mean.Cens}:}{mean censoring time in the PASS data;}
+
+\item{\code{knot.longi}:}{knots used in the natural cubic spline specification of the longitudinal model;}
+
+\item{\code{knot.surv}:}{knots used in the P-splines of the baseline hazard in the survival model;}
+
+\item{\code{betas}:}{coefficients for the fixed effects in the longitudinal submodel for PSA;}
+
+\item{\code{sigma.y}:}{the standard deviation for the residuals in the longitudinal submodel for PSA;}
+
+\item{\code{D_c3}:}{the covariance matrix for the random effects in the longitudinal submodel for PSA;}
+
+\item{\code{gambh}:}{coefficients for the P-spline design matrix of the baseline hazard in the survival submodel;}
+
+\item{\code{gammas}:}{coefficients for the exogenous covariates in the survival submodel;}
+
+\item{\code{alpha}:}{coefficients for the impact from PSA on the time-to-event outcomes in the survival submodel;}
+
+\item{\code{age.mean}:}{mean age observed in the PASS data (centered around 62);}
+
+\item{\code{age.sd}:}{standard deviation of age observed in the PASS data;}
+
+\item{\code{density.mean}:}{mean of the PSA density (in log) observed in the PASS data;}
+
+\item{\code{density.sd}:}{standard deviation of the PSA density (in log) observed in the PASS data;}
+
+\item{\code{cvisit.sep}:}{regular clinical visit interval for PSA measurement. The default is 3 months (0.25 years);}
+
+\item{\code{cvisit.sd}:}{standard deviation of variation in the clinical visit time.}
 }
 \value{
-two datasets
+two datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel).
 }
 \description{
 This function allows you to simulate the outcomes (censoring, progression, early treatment) of patients in AS based on PSA value and baseline age and PSA density.
@@ -60,11 +76,3 @@ This function allows you to simulate the outcomes (censoring, progression, early
 \examples{
 icjmsim()
 }
-\keyword{Cause-specific}
-\keyword{Interval-censored}
-\keyword{Joint}
-\keyword{Model}
-\keyword{Simulation}
-\keyword{an}
-\keyword{based}
-\keyword{on}

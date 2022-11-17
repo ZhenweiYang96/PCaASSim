@@ -1,4 +1,4 @@
-#' A simulation Function based on ICJM fitted on PASS data
+#' A simulation function based on ICJM fitted on PASS data
 #'
 #' This function allows you to simulate the outcomes (censoring, progression, early treatment) of patients in AS based on PSA value and baseline age and PSA density.
 #' @import MASS
@@ -9,26 +9,25 @@
 #' @param n number of patients on active surveillance.
 #' @param seed seed value for reproducibility The default value is 100.
 #' @param param_list the estimated parameters from the PASS data and the fitted ICJM:
-#' \code{t.max}: maximum follow-up time in the PASS data;
-#' \code{mean.Cens}: mean censoring time in the PASS data;
-#' \code{knot.longi}: knots used in the natural cubic spline specification of the longitudinal model;
-#' \code{knot.surv}: knots used in the P-splines of the baseline hazard in the survival model;
-#' \code{betas}: coefficients for the fixed effects in the longitudinal submodel for PSA;
-#' \code{sigma.y}: the standard deviation for the residuals in the longitudinal submodel for PSA;
-#' \code{D_c3}: the covariance matrix for the random effects in the longitudinal submodel for PSA;
-#' \code{gambh}: coefficients for the P-spline design matrix of the baseline hazard in the survival submodel;
-#' \code{gammas}: coefficients for the exogenous covariates in the survival submodel;
-#' \code{alpha}: coefficients for the impact from PSA on the time-to-event outcomes in the survival submodel;
-#' \code{age.mean}: mean age observed in the PASS data (centered around 62);
-#' \code{age.sd}: standard deviation of age observed in the PASS data;
-#' \code{density.mean}: mean of the PSA density (in log) observed in the PASS data;
-#' \code{density.sd}: standard deviation of the PSA density (in log) observed in the PASS data;
-#' \code{cvisit.sep}: regular clinical visit interval for PSA measurement. The default is 3 months (0.25 years);
-#' \code{cvisit.sd}: standard deviation of variation in the clinical visit time.
+#' @param            \code{t.max}: maximum follow-up time in the PASS data;
+#' @param            \code{mean.Cens}: mean censoring time in the PASS data;
+#' @param            \code{knot.longi}: knots used in the natural cubic spline specification of the longitudinal model;
+#' @param            \code{knot.surv}: knots used in the P-splines of the baseline hazard in the survival model;
+#' @param            \code{betas}: coefficients for the fixed effects in the longitudinal submodel for PSA;
+#' @param            \code{sigma.y}: the standard deviation for the residuals in the longitudinal submodel for PSA;
+#' @param            \code{D_c3}: the covariance matrix for the random effects in the longitudinal submodel for PSA;
+#' @param            \code{gambh}: coefficients for the P-spline design matrix of the baseline hazard in the survival submodel;
+#' @param            \code{gammas}: coefficients for the exogenous covariates in the survival submodel;
+#' @param            \code{alpha}: coefficients for the impact from PSA on the time-to-event outcomes in the survival submodel;
+#' @param            \code{age.mean}: mean age observed in the PASS data (centered around 62);
+#' @param            \code{age.sd}: standard deviation of age observed in the PASS data;
+#' @param            \code{density.mean}: mean of the PSA density (in log) observed in the PASS data;
+#' @param            \code{density.sd}: standard deviation of the PSA density (in log) observed in the PASS data;
+#' @param            \code{cvisit.sep}: regular clinical visit interval for PSA measurement. The default is 3 months (0.25 years);
+#' @param            \code{cvisit.sd}: standard deviation of variation in the clinical visit time.
 #' @param Pcomp the compliance rate of PSA measurements. The default value is 100%.
 #' @param Bcomp the compliance rate of biopsies. The default value is 100%.
-#' @keywords Simulation based on an Interval-censored Cause-specific Joint Model
-#' @return two datasets
+#' @return two datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel).
 #' @examples
 #' icjmsim()
 #' @export
