@@ -1,4 +1,4 @@
-exportPattern("^[[:alpha:]]+")
+exportPattern("PCaASSim")
 import(MASS)
 import(JMbayes)
 import(Matrix)
