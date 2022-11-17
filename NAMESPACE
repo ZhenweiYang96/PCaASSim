@@ -1,3 +1,4 @@
+export(icjmsim)
 exportPattern("PCaASSim")
 import(MASS)
 import(JMbayes)

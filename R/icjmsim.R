@@ -30,11 +30,11 @@
 #' @keywords Simulation based on an Interval-censored Cause-specific Joint Model
 #' @return two datasets
 #' @examples
-#' asim()
+#' icjmsim()
 #' @export
 
 
-asim <- function(n = 1000, seed = 100,
+icjmsim <- function(n = 1000, seed = 100,
                  param_list = list(
                    t.max = 12.48,
                    mean.Cens = 5.114849,
