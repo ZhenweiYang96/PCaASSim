@@ -7,7 +7,7 @@ Maintainer: Zhenwei Yang <z.yang@erasmusmc.nl>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 Imports:
-    MASS, JMbayes, Matrix, splines, truncnorm
+    MASS, JMbayes, Matrix, splines, truncnorm, mathjaxr
 License: MIT
 Encoding: UTF-8
 LazyData: true
