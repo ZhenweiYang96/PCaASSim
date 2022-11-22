@@ -13,13 +13,14 @@ icjmsim(
     0.0162572), sigma.y = 0.1452483, D_c3 = matrix(c(0.48387474, -0.04027017,
     -0.07481436, 0.01722258, -0.04027017, 0.77008166, 0.46077603, -0.04049686,
     -0.07481436, 0.46077603, 1.37021094, 1.36480027, 0.01722258, -0.04049686, 1.36480027,
-    2.53766219), 4, 4), gambh = matrix(c(-6.775537,      -4.716391, -2.835004, -1.649737,
-    -1.541211, -1.791381, -1.84636, -1.746593, -1.854139, -2.041937, -2.182281,
-    -2.315315, -5.755751, -4.994471, -4.431788, -4.261764, -4.356832, -4.474064,
-    -4.600834, -4.686764, -4.778267, -4.917803, -5.076011, -5.209827), 12, 2), gammas =
-    c(0.4987653, 0.2340489), alpha = matrix(c(0.1275125, 0.4207432, 3.010636, 2.621581),
-    2, 2), age.mean = -0.1248499, age.sd = 6.86713, density.mean = -2.272663, density.sd
-    = 0.6042731, cvisit.sep = 0.25, cvisit.sd = 0.036),
+    2.53766219), 4, 4), gambh = matrix(c(-6.775537, 
+     -4.716391, -2.835004,
+    -1.649737, -1.541211, -1.791381, -1.84636, -1.746593, -1.854139, -2.041937,
+    -2.182281, -2.315315, -5.755751, -4.994471, -4.431788, -4.261764, -4.356832,
+    -4.474064, -4.600834, -4.686764, -4.778267, -4.917803, -5.076011, -5.209827), 12, 2),
+    gammas = c(0.4987653, 0.2340489), alpha = matrix(c(0.1275125, 0.4207432, 3.010636,
+    2.621581), 2, 2), age.mean = -0.1248499, age.sd = 6.86713, density.mean = -2.272663,
+    density.sd = 0.6042731, cvisit.sep = 0.25, cvisit.sd = 0.036),
   Pcomp = 1,
   Bcomp = 1
 )
@@ -54,7 +55,22 @@ icjmsim(
 \item{Bcomp}{the compliance rate of biopsies. The default value is 1.}
 }
 \value{
-two datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel).
+two datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel). Each datasets contains the following columns:
+\itemize{
+ \item \code{CISNET_ID} - patient ID
+ \item \code{TimeSince_Dx} - Time since start of AS
+ \item \code{PSAValue} - transformation of PSA value (ng/ml), $\log_2(\text{PSA} + 1)$
+ \item \code{time} - true event time in practice
+ \item \code{time.cmp1} - progression-free time
+ \item \code{time.cmp2} - treatment-free time
+ \item \code{status.cmp} - observed event indicator (1 = cancer progression; 2 = early treatment; 0 = censoring)
+ \item \code{density} - baseline PSA density ($\text{ng}/\text{ml}^2$) in log transformation, $\log(\text{PSA density})$
+ \item \code{DxAge} - baseline age, centered around 62 years old
+ \item \code{b1 - b4} - true random effects for PSA
+ \item \code{time.prg} - true cancer progression time. A patient can only have a true event (event is either cancer progression or early treatment) time.
+ \item \code{time.trt} - true early treatment time. A patient can only have a true event (event is either cancer progression or early treatment) time.
+ \item \code{time.cen} - true censoring time.
+}
 }
 \description{
 This function allows you to simulate the outcomes (censoring, progression, early treatment) of patients in AS based on PSA value and baseline age and PSA density.

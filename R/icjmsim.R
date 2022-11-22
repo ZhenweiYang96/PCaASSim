@@ -29,7 +29,22 @@
 #' }
 #' @param Pcomp the compliance rate of PSA measurements. The default value is 1.
 #' @param Bcomp the compliance rate of biopsies. The default value is 1.
-#' @return two datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel).
+#' @return two datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel). Each datasets contains the following columns:
+#' \itemize{
+#'  \item \code{CISNET_ID} - patient ID
+#'  \item \code{TimeSince_Dx} - Time since start of AS
+#'  \item \code{PSAValue} - transformation of PSA value (ng/ml), $\log_2(\text{PSA} + 1)$
+#'  \item \code{time} - true event time in practice
+#'  \item \code{time.cmp1} - progression-free time
+#'  \item \code{time.cmp2} - treatment-free time
+#'  \item \code{status.cmp} - observed event indicator (1 = cancer progression; 2 = early treatment; 0 = censoring)
+#'  \item \code{density} - baseline PSA density ($\text{ng}/\text{ml}^2$) in log transformation, $\log(\text{PSA density})$
+#'  \item \code{DxAge} - baseline age, centered around 62 years old
+#'  \item \code{b1 - b4} - true random effects for PSA
+#'  \item \code{time.prg} - true cancer progression time. A patient can only have a true event (event is either cancer progression or early treatment) time.
+#'  \item \code{time.trt} - true early treatment time. A patient can only have a true event (event is either cancer progression or early treatment) time.
+#'  \item \code{time.cen} - true censoring time.
+#' }
 #' @keywords Interval-censored Cause-specific Joint Model for simulation
 #' @examples
 #' icjmsim()
@@ -161,7 +176,7 @@ icjmsim <- function(n = 1000, seed = 100,
   })
 
   # simulate censoring times from an uniform distribution,
-  # and calculate the observed event times, i.e., min(true event times, censoring times)
+  # and calculate the observed event times, i.e., min(observed event times, censoring times)
   Ctimes <- runif(n, 0, 2 * mean.Cens)
   fixed_visits <- matrix(times, ncol = n)
   fv_idx <- c(1,3,5, seq(9,K, 8))
