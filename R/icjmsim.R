@@ -3,6 +3,7 @@
 #' This function allows you to simulate the outcomes (censoring, progression, early treatment) of patients in AS based on PSA value and baseline age and PSA density.
 #' @import MASS
 #' @import Matrix
+#' @import JMbayes
 #' @import splines
 #' @import truncnorm
 #' @import mathjaxr
@@ -77,18 +78,8 @@ icjmsim <- function(n = 1000, seed = 100,
                  ), Pcomp = 1, Bcomp = 1) {
 
   # Preparation
-  f.org <- c(-0.949107912342758, -0.741531185599394, -0.405845151377397,
-             0, 0.405845151377397, 0.741531185599394, 0.949107912342758,
-             -0.991455371120813, -0.864864423359769, -0.586087235467691,
-             -0.207784955007898, 0.207784955007898, 0.586087235467691,
-             0.864864423359769, 0.991455371120813)
-  w <- c(0.0630920926299786, 0.140653259715526, 0.190350578064785,
-         0.209482141084728, 0.190350578064785, 0.140653259715526,
-         0.0630920926299786, 0.0229353220105292, 0.10479001032225,
-         0.169004726639268, 0.204432940075299, 0.204432940075299,
-         0.169004726639268, 0.10479001032225, 0.0229353220105292)
-  #f.org <- JMbayes:::gaussKronrod()$sk
-  #w <- JMbayes:::gaussKronrod()$wk
+  f.org <- JMbayes:::gaussKronrod()$sk
+  w <- JMbayes:::gaussKronrod()$wk
   knot.longi <- param_list$knot.longi
   knot.surv <- param_list$knot.surv
 
