@@ -1,7 +1,6 @@
 export(icjmsim)
 exportPattern("PCaASSim")
 import(MASS)
-import(JMbayes)
 import(Matrix)
 import(splines)
 import(truncnorm)
