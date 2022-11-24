@@ -30,6 +30,7 @@
 #' }
 #' @param Pcomp the compliance rate of PSA measurements. The default value is 1.
 #' @param Bcomp the compliance rate of biopsies. The default value is 1.
+#' @details The `true event time` is simulated based on the event-specific hazard and bounded with the observed maximum follow-up time (12.48 yrs) in the PASS data. The `censoring time` follows a uniform distribution with the upper bound as the doubled mean of the observed censoring time in the PASS data.
 #' @return two datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel). Each datasets contains the following columns: \cr
 #' \loadmathjax
 #' \itemize{
@@ -43,13 +44,13 @@
 #'  \item \code{density} - baseline PSA density (\mjeqn{\text{ng}/\text{ml}^2}{ASCII representation}) in log transformation, \mjeqn{\log(\text{PSA density})}{ASCII representation}
 #'  \item \code{DxAge} - baseline age, centered around 62 years old
 #'  \item \code{b1 - b4} - true random effects for PSA
-#'  \item \code{time.prg} - true cancer progression time. A patient can only have a true event (event is either cancer progression or early treatment) time.
-#'  \item \code{time.trt} - true early treatment time. A patient can only have a true event (event is either cancer progression or early treatment) time.
+#'  \item \code{time.prg} - true cancer progression time.
+#'  \item \code{time.trt} - true early treatment time.
 #'  \item \code{time.cen} - true censoring time.
 #' }
 #' @keywords ICJM Simulation
 #' @examples
-#' icjmsim()
+#' icjmsim(n = 1e5)
 #' @export
 
 
@@ -123,7 +124,8 @@ icjmsim <- function(n = 1000, seed = 100,
   eta.t <- cbind(as.vector(density * gammas[1]),
                  as.vector(density * gammas[2]))
 
-  invS <- function (t, u, i) {
+  # hazard function for both events
+  invS <- function (t, u, i, k) {
     h <- function (s, k) {
       age.i <- age[i]
       XX <- cbind(1, ns(s, knots = knot.longi[2:3], B = knot.longi[c(1,4)]), age.i)
@@ -137,45 +139,22 @@ icjmsim <- function(n = 1000, seed = 100,
       exp(bh %*% gambh[,k]  + eta.t[i,k] + f * alpha[k,1] + (f - f.back) * alpha[k,2])
 
     }
-    integrate(h, lower = 0, upper = t, k = 1)$value + integrate(h, lower = 0, upper = t, k = 2)$value + log(u)
+    integrate(h, lower = 0, upper = t, k = k)$value + log(u)
   }
-  u <- runif(n)
-  trueTimes <- matrix(NA, n)
+  u1 <- runif(n) # cancer progression
+  u2 <- runif(n) # early treatment
+  trueTimes1 <- matrix(NA, n) # true time for progression
+  trueTimes2 <- matrix(NA, n) # true time for early treatment
 
   for (i in 1:n) {
-    Up <- 50
-    tries <- 5
-    Root <- try(uniroot(invS, interval = c(1e-05, Up), u = u[i], i = i)$root, TRUE)
-    while(inherits(Root, "try-error") && tries > 0) {
-      tries <- tries - 1
-      Up <- Up + 200
-      Root <- try(uniroot(invS, interval = c(1e-05, Up), u = u[i], i = i)$root, TRUE)
-    }
-    trueTimes[i] <- if (!inherits(Root, "try-error")) Root else NA
+    # event 1 cancer progression
+    Root1 <- try(uniroot(invS, interval = c(1e-05, 12.48), u = u1[i], i = i, k = 1)$root, TRUE)
+    trueTimes1[i] <- if (!inherits(Root1, "try-error")) Root1 else 12.48 # bounded with the longest follow-up
+
+    # event 2 early treatment
+    Root2 <- try(uniroot(invS, interval = c(1e-05, 12.48), u = u2[i], i = i, k = 2)$root, TRUE)
+    trueTimes2[i] <- if (!inherits(Root2, "try-error")) Root2 else 12.48 # bounded with the longest follow-up
   }
-  trueTimes[is.na(trueTimes)] <- 1e06
-
-  ## simulate which event is
-  # calculate the instantaneous hazard
-  h <- function (s, k ,i) {
-    age.i <- age[i]
-    XX <- cbind(1, ns(s, knots = knot.longi[2:3], B = knot.longi[c(1,4)]), age.i)
-    XX.back <- cbind(1, ns(s - 1, knots = knot.longi[2:3], B = knot.longi[c(1,4)]), age.i)
-    ZZ <- cbind(1, ns(s, knots = knot.longi[2:3], B = knot.longi[c(1,4)]))
-    ZZ.back <- cbind(1, ns(s - 1, knots = knot.longi[2:3], B = knot.longi[c(1,4)]))
-    f <- as.vector(XX %*% betas + rowSums(ZZ * b[rep(i, nrow(ZZ)), 1:4]))
-    f.back <- as.vector(XX.back %*% betas + rowSums(ZZ.back * b[rep(i, nrow(ZZ)), 1:4]))
-    bh <- splineDesign(knots = knot.surv, s, ord = 4L, outer.ok = T)
-
-    return(ifelse(exp(bh %*% gambh[,k]  + eta.t[i,k] + f * alpha[k,1] + (f - f.back) * alpha[k,2]) < 1e-16,
-                  1e-16,
-                  exp(bh %*% gambh[,k]  + eta.t[i,k] + f * alpha[k,1] + (f - f.back) * alpha[k,2])))
-
-  }
-
-  event.2 <- sapply(1:n, function(i) {
-    rbinom(1, 1, h(trueTimes[i], 2, i)/(h(trueTimes[i], 2, i) + h(trueTimes[i], 1, i))) + 1  # in rbinom 1 = event 2
-  })
 
   # simulate censoring times from an uniform distribution,
   # and calculate the observed event times, i.e., min(observed event times, censoring times)
@@ -191,53 +170,29 @@ icjmsim <- function(n = 1000, seed = 100,
                          nrow(fixed_visits), ncol(fixed_visits)) # the compliance rate of biopsies
   fixed_visits <- fixed_visits * fixed_visits_cmpl # updated biopsies with compliance rate
 
-  Time.prg <- sapply(1:n, function(i) {ifelse(event.2[i] == 1, trueTimes[i], NA)})
+  Time.prg <- trueTimes1
   Time.prg_obs <- sapply(1:n, function(i) {
-    if(event.2[i] == 1) {
-      if(sum(fixed_visits[,i] >= trueTimes[i]) == 0) {
-        max(fixed_visits[,i])
-      } else {
-        min(fixed_visits[fixed_visits[,i] >= trueTimes[i],i])
-      }
-    } else {
-      NA
-    }
+    min(fixed_visits[fixed_visits[,i] >= trueTimes1[i],i])
   })
-  Time.trt <- sapply(1:n, function(i) {ifelse(event.2[i] == 2, trueTimes[i], NA)})
+  Time.trt <- trueTimes2
   Time.cen <- Ctimes
-  Time <- pmin(Ctimes, Time.prg_obs, Time.trt, na.rm = T)
+  Time <- pmin(Ctimes, Time.prg_obs, Time.trt)
 
-  event <- sapply(1:n, function(i) {ifelse(max(Time.prg_obs[i], Time.trt[i], na.rm = T) < Ctimes[i], event.2[i], 0)}) # event indicator
+  event <- sapply(1:n, function(i) {which.min(c(Time.cen[i], Time.prg_obs[i], Time.trt[i]))}) - 1 # event indicator
 
-  Time[event == 1] <- Time.prg[event == 1]
+  Time2 <- Time # the observed event time
 
-  # fixed_visits <- matrix(times, ncol = n)
-  # fv_idx <- c(1,3,5, seq(9,K, 8))
-  # if (K %in% fv_idx) {
-  #   fixed_visits <- fixed_visits[fv_idx,]
-  # } else {
-  #   fixed_visits <- fixed_visits[c(fv_idx, K),]
-  # }
+  Time[event == 1] <- Time.prg[event == 1] # the true event time
 
   Time1 <- sapply(1:n, function(i) {
-    max(fixed_visits[fixed_visits[,i] <= Time[i],i])
-  })
-
-  Time2 <- sapply(1:n, function(i) {
-    ifelse(event[i] == 1, min(fixed_visits[fixed_visits[,i] >= Time[i], i]), Time[i])
+    max(fixed_visits[fixed_visits[,i] <= Time[i],i]) # the last biopsy time
   })
 
   # sum(Time2 < Time1)
   # sum(Time1 <0 & Time2 <0)
 
   times.mat <- matrix(times, ncol = n)
-  ind <- sapply(1:n, function(i) {
-    if(event[i] != 1) {
-      times.mat[,i] <= rep(Time[i], K)
-    } else {
-      times.mat[,i] <= rep(Time2[i], K)
-    }
-  })
+  ind <- sapply(1:n, function(i) {times.mat[,i] <= rep(Time2[i], K)})
 
   # add compliance rate for PSA
   ind.cmpl <- rbinom(length(ind), 1, Pcomp)

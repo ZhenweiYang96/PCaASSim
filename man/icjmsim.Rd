@@ -68,16 +68,19 @@ two datasets. First dataset records all the longitudinal measurements (used in t
  \item \code{density} - baseline PSA density (\mjeqn{\text{ng}/\text{ml}^2}{ASCII representation}) in log transformation, \mjeqn{\log(\text{PSA density})}{ASCII representation}
  \item \code{DxAge} - baseline age, centered around 62 years old
  \item \code{b1 - b4} - true random effects for PSA
- \item \code{time.prg} - true cancer progression time. A patient can only have a true event (event is either cancer progression or early treatment) time.
- \item \code{time.trt} - true early treatment time. A patient can only have a true event (event is either cancer progression or early treatment) time.
+ \item \code{time.prg} - true cancer progression time.
+ \item \code{time.trt} - true early treatment time.
  \item \code{time.cen} - true censoring time.
 }
 }
 \description{
 This function allows you to simulate the outcomes (censoring, progression, early treatment) of patients in AS based on PSA value and baseline age and PSA density.
 }
+\details{
+The `true event time` is simulated based on the event-specific hazard and bounded with the observed maximum follow-up time (12.48 yrs) in the PASS data. The `censoring time` follows a uniform distribution with the upper bound as the doubled mean of the observed censoring time in the PASS data.
+}
 \examples{
-icjmsim()
+icjmsim(n = 1e5)
 }
 \keyword{ICJM}
 \keyword{Simulation}
