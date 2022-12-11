@@ -33,11 +33,11 @@
 #' @param Pcomp the compliance rate of PSA measurements. The default value is 1.
 #' @param Bcomp the compliance rate of biopsies. The default value is 1.
 #' @details The `true event time` is simulated based on the event-specific hazard and bounded with the observed maximum follow-up time (12.48 yrs) in the PASS data. The `censoring time` follows a uniform distribution with the upper bound as the doubled mean of the observed censoring time in the PASS data.
-#' @return two datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel). Each datasets contains the following columns: \cr
+#' @return four datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel). Each datasets contains the following columns: \cr
 #' \loadmathjax
 #' \itemize{
 #'  \item \code{CISNET_ID} - patient ID
-#'  \item \code{TimeSince_Dx} - Time since start of AS
+#'  \item \code{TimeSince_Dx} - PSA time since start of AS
 #'  \item \code{PSAValue} - transformation of PSA value (ng/ml), \mjeqn{\log_2(\text{PSA} + 1)}{ASCII representation}
 #'  \item \code{time} - true event time in practice
 #'  \item \code{time.cmp1} - progression-free time
@@ -49,6 +49,16 @@
 #'  \item \code{time.prg} - true cancer progression time.
 #'  \item \code{time.trt} - true early treatment time.
 #'  \item \code{time.cen} - true censoring time.
+#' } \cr
+#' The third dataset contains all the biopsies each patient participated in and has the following columns: \cr
+#' \loadmathjax
+#' \itemize{
+#'  \item \code{CISNET_ID} - patient ID
+#'  \item \code{TimeSince_Dx} - biopsy time since start of AS
+#'  \item \code{compliance} - whether the patient participates in this biopsy
+#'  \item \code{bioresult} - whether the patient is detected with progression
+#'  \item \code{time} - true event time in practice
+#'  \item \code{time.cmp2} - treatment-free time, which is also the time until which the patient is followed
 #' }
 #' @keywords MCICJM Simulation
 #' @examples
@@ -174,13 +184,14 @@ mcicjmsim <- function(n = 1000, seed = 100,
                               nrow(fixed_visits), ncol(fixed_visits)) # the compliance rate of biopsies
   fixed_visits_sens <- matrix(rbinom(length(fixed_visits), 1, Bsens),
                               nrow(fixed_visits), ncol(fixed_visits)) # the sensitivity of biopsies
-  fixed_visits <- fixed_visits * fixed_visits_cmpl * fixed_visits_sens # updated biopsies with compliance rate and sensitivity
+  fixed_visits_obstime <- fixed_visits * fixed_visits_cmpl * fixed_visits_sens # updated biopsies with compliance rate and sensitivity
+  fixed_visits_time1 <- fixed_visits * fixed_visits_cmpl
 
   Time.prg <- trueTimes1
   Time.prg_obs <- sapply(1:n, function(i) {
-    ifelse(max(c(trueTimes1[i], fixed_visits[,i])) == trueTimes1[i],
+    ifelse(max(c(trueTimes1[i], fixed_visits_time1[,i])) == trueTimes1[i],
            t.max + 1,
-           min(fixed_visits[fixed_visits[,i] >= trueTimes1[i],i]))
+           min(fixed_visits_time1[fixed_visits_time1[,i] >= trueTimes1[i],i]))
   })
   Time.trt <- trueTimes2
   Time.cen <- Ctimes
@@ -193,11 +204,19 @@ mcicjmsim <- function(n = 1000, seed = 100,
   Time[event == 1] <- Time.prg[event == 1] # the true event time
 
   Time1 <- sapply(1:n, function(i) {
-    max(fixed_visits[fixed_visits[,i] <= Time[i],i]) # the last biopsy time
+    max(fixed_visits_time1[fixed_visits_time1[,i] <= Time[i],i]) # the last biopsy time
   })
 
   # sum(Time2 < Time1)
   # sum(Time1 <0 & Time2 <0)
+
+  fixed_visits_senslog <- matrix(0, nrow(fixed_visits), ncol(fixed_visits))
+  for (i in 1:n) {
+    if (event[i] == 1) {
+      fixed_visits_senslog[fixed_visits[,i] == Time.prg_obs[i],i] <- 1
+    }
+  }
+
 
   times.mat <- matrix(times, ncol = n)
   ind <- sapply(1:n, function(i) {times.mat[,i] <= rep(Time2[i], K)})
@@ -233,6 +252,16 @@ mcicjmsim <- function(n = 1000, seed = 100,
 
   dat.id <- dat[!duplicated(dat$CISNET_ID), ]
 
+  biopsy_full <- data.frame(CISNET_ID = rep(1:n, each = nrow(fixed_visits)),
+                            TimeSince_Dx = c(fixed_visits),
+                            compliance = as.logical(fixed_visits_time1),
+                            bioresult = as.logical(fixed_visits_senslog),
+                            time = rep(Time, each = nrow(fixed_visits)),
+                            time.cmp2 = rep(Time2, each = nrow(fixed_visits)))
+
+  biopsy <- biopsy_full[biopsy_full$compliance & biopsy_full$TimeSince_Dx <= biopsy_full$time.cmp2, ]
+
   return(list(dat = dat,
-              dat.id = dat.id))
+              dat.id = dat.id,
+              biopsy = biopsy))
 }
