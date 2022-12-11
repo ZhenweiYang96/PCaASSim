@@ -178,8 +178,9 @@ mcicjmsim <- function(n = 1000, seed = 100,
 
   Time.prg <- trueTimes1
   Time.prg_obs <- sapply(1:n, function(i) {
-    obs <- try(min(fixed_visits[fixed_visits[,i] >= trueTimes1[i],i]), TRUE)
-    if (!inherits(obs, "try-error")) obs else t.max + 1
+    ifelse(max(c(trueTimes1[i], fixed_visits[,i])) == trueTimes1[i],
+           t.max + 1,
+           min(fixed_visits[fixed_visits[,i] >= trueTimes1[i],i]))
   })
   Time.trt <- trueTimes2
   Time.cen <- Ctimes
