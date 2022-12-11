@@ -4,8 +4,7 @@ Title: Simulation of PCa patients on AS
 Version: 0.1.0
 Author: Zhenwei Yang
 Maintainer: Zhenwei Yang <z.yang@erasmusmc.nl>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: This is the package to simulate data of PCa patients on AS. The data are generated from the ICJM or MCICJM (with sensitivity of 0.5) fitted on the Canary PASS trial.
 Imports:
     MASS, Matrix, JMbayes, splines, truncnorm, mathjaxr
 RdMacros: mathjaxr
