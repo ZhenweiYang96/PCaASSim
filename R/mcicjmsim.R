@@ -57,6 +57,7 @@
 #'  \item \code{TimeSince_Dx} - biopsy time since start of AS
 #'  \item \code{compliance} - whether the patient participates in this biopsy
 #'  \item \code{bioresult} - whether the patient is detected with progression
+#'  \item \code{status.cmp} - observed event indicator (1 = cancer progression; 2 = early treatment; 0 = censoring)
 #'  \item \code{time} - true event time in practice
 #'  \item \code{time.cmp2} - treatment-free time, which is also the time until which the patient is followed
 #' }
@@ -256,6 +257,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
                             TimeSince_Dx = c(fixed_visits),
                             compliance = as.logical(fixed_visits_time1),
                             bioresult = as.logical(fixed_visits_senslog),
+                            status.cmp = rep(event, each = nrow(fixed_visits)),
                             time = rep(Time, each = nrow(fixed_visits)),
                             time.cmp2 = rep(Time2, each = nrow(fixed_visits)))
 
