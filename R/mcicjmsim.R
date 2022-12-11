@@ -1,6 +1,7 @@
-#' A simulation function based on ICJM fitted on PASS data
+#' A simulation function based on MCICJM fitted on PASS data
 #'
-#' This function allows you to simulate the outcomes (censoring, progression, early treatment) of patients in AS based on PSA value and baseline age and PSA density.
+#' This function allows you to simulate the outcomes (censoring, progression, early treatment) of patients in AS based on PSA value and baseline age and PSA density. \cr
+#' In addition to \code{icjmsim()}, this function considers the biopsy sensitivity of 0.5.
 #' @import MASS
 #' @import Matrix
 #' @import JMbayes
@@ -27,6 +28,7 @@
 #'   \item \code{density.sd} - standard deviation of the PSA density (in log) observed in the PASS data
 #'   \item \code{cvisit.sep} - regular clinical visit interval for PSA measurement. The default is 3 months (0.25 years)
 #'   \item \code{cvisit.sd} - standard deviation of variation in the clinical visit time
+#'   \item \code{sensitivity} - biopsy sensitivity, set to be 0.5
 #' }
 #' @param Pcomp the compliance rate of PSA measurements. The default value is 1.
 #' @param Bcomp the compliance rate of biopsies. The default value is 1.
@@ -48,35 +50,36 @@
 #'  \item \code{time.trt} - true early treatment time.
 #'  \item \code{time.cen} - true censoring time.
 #' }
-#' @keywords ICJM Simulation
+#' @keywords MCICJM Simulation
 #' @examples
-#' icjmsim(n = 1e5)
+#' mcicjmsim(n = 1e5)
 #' @export
 
 
-icjmsim <- function(n = 1000, seed = 100,
-                 param_list = list(
-                   t.max = 12.48,
-                   mean.Cens = 5.114849,
-                   knot.longi = c(0, 1.36, 2.96, 12.48),
-                   knot.surv = c(0, 0, 0, 0, 1.05, 1.82, 2.41, 3.13, 3.91, 4.67, 5.56, 6.93, 12.48, 12.48, 12.48, 12.48),
-                   betas = c(2.3428173, 0.2790604, 0.6051217, 0.9545555, 0.0162572),
-                   sigma.y = 0.1452483,
-                   D_c3 = matrix(c(0.48387474, -0.04027017, -0.07481436,  0.01722258,
-                                   -0.04027017, 0.77008166,  0.46077603, -0.04049686,
-                                   -0.07481436,  0.46077603,  1.37021094,  1.36480027,
-                                   0.01722258, -0.04049686,  1.36480027,  2.53766219), 4, 4),
-                   gambh = matrix(c(-6.775537, -4.716391, -2.835004, -1.649737, -1.541211, -1.791381, -1.846360, -1.746593, -1.854139, -2.041937, -2.182281, -2.315315,
-                                    -5.755751, -4.994471, -4.431788, -4.261764, -4.356832, -4.474064, -4.600834, -4.686764, -4.778267, -4.917803, -5.076011, -5.209827), 12, 2),
-                   gammas = c(0.4987653, 0.2340489),
-                   alpha = matrix(c(0.1275125, 3.010636, 0.4207432, 2.621581), 2, 2),
-                   age.mean = -0.1248499,
-                   age.sd = 6.86713,
-                   density.mean = -2.272663,
-                   density.sd = 0.6042731,
-                   cvisit.sep = 0.25,
-                   cvisit.sd = 0.036
-                 ), Pcomp = 1, Bcomp = 1) {
+mcicjmsim <- function(n = 1000, seed = 100,
+                    param_list = list(
+                      t.max = 12.48,
+                      mean.Cens = 5.114849,
+                      knot.longi = c(0, 1.36, 2.96, 12.48),
+                      knot.surv = c(0, 0, 0, 0, 1.05, 1.82, 2.41, 3.13, 3.91, 4.67, 5.56, 6.93, 12.48, 12.48, 12.48, 12.48),
+                      betas = c(2.356578697, 0.274391033, 0.612221625, 0.972303239, 0.016394291),
+                      sigma.y = 0.1452828,
+                      D_c3 = matrix(c(0.484457235 , -0.037087017, -0.086005920,  -0.003621471,
+                                      -0.037087017, 0.779744556,  0.424119912, -0.104367978,
+                                      -0.086005920,  0.424119912,  1.423327185,  1.474941751,
+                                      -0.003621471, -0.104367978,  1.474941751,  2.745178027), 4, 4),
+                      gambh = matrix(c(-4.554247885, -2.431267662, -0.726208821, -0.295394857, -0.685145348, -1.199522121, -1.701821794, -2.134330688, -2.382277522, -2.512485057, -2.549171766, -2.552028383,
+                                       -5.259334899, -4.639982156, -4.332605036, -4.385041310, -4.562366014, -4.731760452, -4.892164516, -4.995863325, -5.156619515, -5.356645767, -5.542735349, -5.719399707), 12, 2),
+                      gammas = c(0.667693823, 0.239728042),
+                      alpha = matrix(c(0.078023016, 2.916081305, 0.422728218, 2.131612465), 2, 2),
+                      age.mean = -0.1248499,
+                      age.sd = 6.86713,
+                      density.mean = -2.272663,
+                      density.sd = 0.6042731,
+                      cvisit.sep = 0.25,
+                      cvisit.sd = 0.036,
+                      sensitivity = 0.5
+                    ), Pcomp = 1, Bcomp = 1) {
 
   # Preparation
   f.org <- JMbayes:::gaussKronrod()$sk
@@ -94,6 +97,7 @@ icjmsim <- function(n = 1000, seed = 100,
   alpha <- param_list$alpha
   gambh <- param_list$gambh
   mean.Cens <- param_list$mean.Cens
+  Bsens <- param_list$sensitivity
   V <- param_list$D_c3
   V <- nearPD(V)$mat
   D <- V
@@ -167,8 +171,10 @@ icjmsim <- function(n = 1000, seed = 100,
     fixed_visits <- fixed_visits[c(fv_idx, K),]
   }
   fixed_visits_cmpl <- matrix(rbinom(length(fixed_visits), 1, Bcomp),
-                         nrow(fixed_visits), ncol(fixed_visits)) # the compliance rate of biopsies
-  fixed_visits <- fixed_visits * fixed_visits_cmpl # updated biopsies with compliance rate
+                              nrow(fixed_visits), ncol(fixed_visits)) # the compliance rate of biopsies
+  fixed_visits_sens <- matrix(rbinom(length(fixed_visits), 1, Bsens),
+                              nrow(fixed_visits), ncol(fixed_visits)) # the sensitivity of biopsies
+  fixed_visits <- fixed_visits * fixed_visits_cmpl * fixed_visits_sens # updated biopsies with compliance rate and sensitivity
 
   Time.prg <- trueTimes1
   Time.prg_obs <- sapply(1:n, function(i) {
@@ -176,7 +182,7 @@ icjmsim <- function(n = 1000, seed = 100,
   })
   Time.trt <- trueTimes2
   Time.cen <- Ctimes
-  Time <- pmin(Ctimes, Time.prg_obs, Time.trt)
+  Time <- pmin(Ctimes, Time.prg_obs, Time.trt, na.rm = T)
 
   event <- sapply(1:n, function(i) {which.min(c(Time.cen[i], Time.prg_obs[i], Time.trt[i]))}) - 1 # event indicator
 
