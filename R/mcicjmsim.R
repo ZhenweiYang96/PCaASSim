@@ -178,11 +178,12 @@ mcicjmsim <- function(n = 1000, seed = 100,
 
   Time.prg <- trueTimes1
   Time.prg_obs <- sapply(1:n, function(i) {
-    min(fixed_visits[fixed_visits[,i] >= trueTimes1[i],i])
+    obs <- try(min(fixed_visits[fixed_visits[,i] >= trueTimes1[i],i]), TRUE)
+    if (!inherits(obs, "try-error")) obs else t.max + 1
   })
   Time.trt <- trueTimes2
   Time.cen <- Ctimes
-  Time <- pmin(Ctimes, Time.prg_obs, Time.trt, na.rm = T)
+  Time <- pmin(Ctimes, Time.prg_obs, Time.trt)
 
   event <- sapply(1:n, function(i) {which.min(c(Time.cen[i], Time.prg_obs[i], Time.trt[i]))}) - 1 # event indicator
 
