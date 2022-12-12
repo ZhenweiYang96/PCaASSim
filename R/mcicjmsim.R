@@ -190,9 +190,9 @@ mcicjmsim <- function(n = 1000, seed = 100,
 
   Time.prg <- trueTimes1
   Time.prg_obs <- sapply(1:n, function(i) {
-    ifelse(max(c(trueTimes1[i], fixed_visits_time1[,i])) == trueTimes1[i],
+    ifelse(max(c(trueTimes1[i], fixed_visits_obstime[,i])) == trueTimes1[i],
            t.max + 1,
-           min(fixed_visits_time1[fixed_visits_time1[,i] >= trueTimes1[i],i]))
+           min(fixed_visits_obstime[fixed_visits_obstime[,i] >= trueTimes1[i],i]))
   })
   Time.trt <- trueTimes2
   Time.cen <- Ctimes
@@ -202,11 +202,11 @@ mcicjmsim <- function(n = 1000, seed = 100,
 
   Time2 <- Time # the observed event time
 
-  Time[event == 1] <- Time.prg[event == 1] # the true event time
-
   Time1 <- sapply(1:n, function(i) {
-    max(fixed_visits_time1[fixed_visits_time1[,i] <= Time[i],i]) # the last biopsy time
+    max(fixed_visits_time1[fixed_visits_time1[,i] < Time[i],i]) # the last biopsy time
   })
+
+  Time[event == 1] <- Time.prg[event == 1] # the true event time
 
   # sum(Time2 < Time1)
   # sum(Time1 <0 & Time2 <0)
