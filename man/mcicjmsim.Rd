@@ -59,11 +59,11 @@ mcicjmsim(
 \item{Bcomp}{the compliance rate of biopsies. The default value is 1.}
 }
 \value{
-two datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel). Each datasets contains the following columns: \cr
+three datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel). Each datasets contains the following columns: \cr
 \loadmathjax
 \itemize{
  \item \code{CISNET_ID} - patient ID
- \item \code{TimeSince_Dx} - Time since start of AS
+ \item \code{TimeSince_Dx} - PSA time since start of AS
  \item \code{PSAValue} - transformation of PSA value (ng/ml), \mjeqn{\log_2(\text{PSA} + 1)}{ASCII representation}
  \item \code{time} - true event time in practice
  \item \code{time.cmp1} - progression-free time
@@ -75,6 +75,17 @@ two datasets. First dataset records all the longitudinal measurements (used in t
  \item \code{time.prg} - true cancer progression time.
  \item \code{time.trt} - true early treatment time.
  \item \code{time.cen} - true censoring time.
+} \cr
+The third dataset contains all the biopsies each patient participated in and has the following columns: \cr
+\loadmathjax
+\itemize{
+ \item \code{CISNET_ID} - patient ID
+ \item \code{TimeSince_Dx} - biopsy time since start of AS
+ \item \code{compliance} - whether the patient participates in this biopsy
+ \item \code{bioresult} - whether the patient is detected with progression
+ \item \code{status.cmp} - observed event indicator (1 = cancer progression; 2 = early treatment; 0 = censoring)
+ \item \code{time} - true event time in practice
+ \item \code{time.cmp2} - treatment-free time, which is also the time until which the patient is followed
 }
 }
 \description{
