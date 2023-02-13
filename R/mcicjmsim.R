@@ -1,7 +1,7 @@
 #' A simulation function based on MCICJM fitted on PASS data
 #'
 #' This function allows you to simulate the outcomes (censoring, progression, early treatment) of patients in AS based on PSA value and baseline age and PSA density. \cr
-#' In addition to \code{icjmsim()}, this function considers the biopsy sensitivity of 0.5.
+#' In addition to \code{icjmsim()}, this function considers the biopsy sensitivity (0.6 to 0.9 with a step pf 0.05).
 #' @import MASS
 #' @import Matrix
 #' @import JMbayes
@@ -10,7 +10,7 @@
 #' @import mathjaxr
 #' @param n number of patients on active surveillance.
 #' @param seed seed value for reproducibility The default value is 100.
-#' @param param_list the estimated parameters from the PASS data and the fitted ICJM: \cr
+#' @param param_list the estimated parameters from the PASS data and the fitted MCICJM: \cr
 #' \itemize{
 #'   \item \code{t.max} - maximum follow-up time in the PASS data
 #'   \item \code{mean.Cens} - mean censoring time in the PASS data
@@ -22,8 +22,8 @@
 #'   \item \code{density.sd} - standard deviation of the PSA density (in log) observed in the PASS data
 #'   \item \code{cvisit.sep} - regular clinical visit interval for PSA measurement. The default is 3 months (0.25 years)
 #'   \item \code{cvisit.sd} - standard deviation of variation in the clinical visit time
-#'   \item \code{sensitivity} - biopsy sensitivity, can be chose from (0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9)
 #' }
+#' @param sensitivity biopsy sensitivity, can be chose from (0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9).
 #' @param Pcomp the compliance rate of PSA measurements. The default value is 1.
 #' @param Bcomp the compliance rate of biopsies. The default value is 1.
 #' @details The simulated data are based on seven MCICJMs fitted on the Canary PASS data with fixed biopsy sensitivity ranging from 0.6 to 0.9 (with a step of 0.05). According to the user-specified sensitivity in the above-mentioned range, the following parameters are corresponding chosen \cr
@@ -67,7 +67,7 @@
 #' }
 #' @keywords MCICJM Simulation
 #' @examples
-#' mcicjmsim(n = 1e5)
+#' mcicjmsim(n = 1e5, )
 #' @export
 
 
@@ -82,16 +82,15 @@ mcicjmsim <- function(n = 1000, seed = 100,
                         density.mean = -2.272663,
                         density.sd = 0.6042731,
                         cvisit.sep = 0.25,
-                        cvisit.sd = 0.036,
-                        sensitivity = 0.6
-                      ), Pcomp = 1, Bcomp = 1) {
+                        cvisit.sd = 0.036
+                      ), sensitivity = 0.6, Pcomp = 1, Bcomp = 1) {
 
 
-  if (!(param_list$sensitivity %in% seq(0.6, 0.9, 0.05))) {
+  if (!(sensitivity %in% seq(0.6, 0.9, 0.05))) {
     stop("The biopsy sensitivity can only be choosen from {0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9}!")
   }
 
-  if (param_list$sensitivity == 0.6) {
+  if (sensitivity == 0.6) {
     betas = c(2.352129324, 0.272079034, 0.649459222, 1.043220801, 0.015353075)
     sigma.y = 0.1452562
     D_c3 = matrix(c(0.487468820 , -0.037135406, -0.082449747,  0.009012073,
@@ -102,7 +101,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
                      -5.203236363, -4.593533092, -4.272369528, -4.336942011, -4.515441308, -4.668240880, -4.776437392, -4.894436058, -5.038643556, -5.232683167, -5.448271313, -5.674776358), 12, 2)
     gammas = c(0.431700436, 0.245930039)
     alpha = matrix(c(0.151630901, 1.898640758, 0.398278261, 2.269081065), 2, 2)
-  } else if (param_list$sensitivity == 0.65) {
+  } else if (sensitivity == 0.65) {
     betas = c(2.35916156, 0.28071219, 0.65276735, 1.04312064, 0.01553781)
     sigma.y = 0.1451515
     D_c3 = matrix(c(0.48884643 , -0.03559557, -0.08159353,  0.01088569,
@@ -113,7 +112,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
                      -5.25539587, -4.62908939, -4.31838007, -4.38518099, -4.55201518, -4.73041562, -4.87841681, -4.99229966, -5.12067110, -5.28471702, -5.46297205, -5.65432410), 12, 2)
     gammas = c(0.38845430, 0.23130498)
     alpha = matrix(c(0.18026827, 1.88920829, 0.40362622, 2.30624195), 2, 2)
-  } else if (param_list$sensitivity == 0.7) {
+  } else if (sensitivity == 0.7) {
     betas = c(2.34896747, 0.26474019, 0.61614647, 0.98789633, 0.01823955)
     sigma.y = 0.1453678
     D_c3 = matrix(c(0.48696044 , -0.04170548, -0.07496125,  0.02288856,
@@ -124,7 +123,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
                      -5.21628282, -4.58699991, -4.29018145, -4.34477514, -4.51164100, -4.67731307, -4.80494661, -4.90464411, -5.04741293, -5.26605583, -5.47555666, -5.68352060), 12, 2)
     gammas = c(0.41174044, 0.24861549)
     alpha = matrix(c(0.16779912, 1.80523286, 0.40977825, 2.20759527), 2, 2)
-  } else if (param_list$sensitivity == 0.75) {
+  } else if (sensitivity == 0.75) {
     betas = c(2.353551638, 0.269237668, 0.623986138, 1.002590218, 0.015519893)
     sigma.y = 0.1452596
     D_c3 = matrix(c(0.487678959 , -0.036874777, -0.089776421,  -0.003862647,
@@ -135,7 +134,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
                      -5.128957296, -4.551501961, -4.263715050, -4.308050583, -4.474338093, -4.645207487, -4.802948164, -4.912553004, -5.113348423, -5.372396769, -5.660759223, -5.967330241), 12, 2)
     gammas = c(0.414315298, 0.251801149)
     alpha = matrix(c(0.162897891, 1.788904469, 0.399214083, 2.222056696), 2, 2)
-  } else if (param_list$sensitivity == 0.8) {
+  } else if (sensitivity == 0.8) {
     betas = c(2.356588481, 0.272948830, 0.644815621, 1.033282724, 0.016234042)
     sigma.y = 0.1452074
     D_c3 = matrix(c(0.486820011 , -0.038621202, -0.082794049,  0.008926739,
@@ -146,7 +145,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
                      -5.360538803, -4.713752544, -4.378904766, -4.434691999, -4.627262507, -4.800936028, -4.961507735, -5.075348794, -5.217484592, -5.426660617, -5.628647195, -5.812534988), 12, 2)
     gammas = c(0.385386823, 0.220831854)
     alpha = matrix(c(0.188245170, 1.748985371, 0.423016178, 2.261760329), 2, 2)
-  } else if (param_list$sensitivity == 0.85) {
+  } else if (sensitivity == 0.85) {
     betas = c(2.352953430, 0.275257794, 0.597686113, 0.944273172, 0.016290199)
     sigma.y = 0.1452433
     D_c3 = matrix(c(0.488642352 , -0.036540460, -0.092497113,  -0.009357853,
@@ -157,7 +156,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
                      -5.408805589, -4.792106879, -4.487409068, -4.549508620, -4.729942716, -4.883242980, -5.024760368, -5.148596877, -5.323965018, -5.529580632, -5.754638580, -5.971977563), 12, 2)
     gammas = c(0.404188401, 0.202586480)
     alpha = matrix(c(0.169192069, 1.761858497, 0.449120817, 2.173414918), 2, 2)
-  } else if (param_list$sensitivity == 0.9) {
+  } else if (sensitivity == 0.9) {
     betas = c(2.353453856, 0.277881395, 0.644051169, 1.021577864, 0.014977841)
     sigma.y = 0.1452473
     D_c3 = matrix(c(0.487862642 , -0.038482497, -0.085932777,  -0.009357853,
@@ -186,7 +185,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
   # alpha <- param_list$alpha
   # gambh <- param_list$gambh
   mean.Cens <- param_list$mean.Cens
-  Bsens <- param_list$sensitivity
+  Bsens <- sensitivity
   V <-  D_c3 #param_list$
   V <- nearPD(V)$mat
   D <- V

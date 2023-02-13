@@ -11,7 +11,8 @@ mcicjmsim(
     12.48), knot.surv = c(0, 0, 0, 0, 1.386667, 2.773333, 4.16, 5.546667, 6.933333, 8.32,
     9.706667, 11.093333, 12.48, 12.48, 12.48, 12.48), age.mean = -0.1248499, age.sd =
     6.86713, density.mean = -2.272663, density.sd = 0.6042731, cvisit.sep = 0.25,
-    cvisit.sd = 0.036, sensitivity = 0.6),
+    cvisit.sd = 0.036),
+  sensitivity = 0.6,
   Pcomp = 1,
   Bcomp = 1
 )
@@ -21,7 +22,7 @@ mcicjmsim(
 
 \item{seed}{seed value for reproducibility The default value is 100.}
 
-\item{param_list}{the estimated parameters from the PASS data and the fitted ICJM: \cr
+\item{param_list}{the estimated parameters from the PASS data and the fitted MCICJM: \cr
 \itemize{
   \item \code{t.max} - maximum follow-up time in the PASS data
   \item \code{mean.Cens} - mean censoring time in the PASS data
@@ -33,8 +34,9 @@ mcicjmsim(
   \item \code{density.sd} - standard deviation of the PSA density (in log) observed in the PASS data
   \item \code{cvisit.sep} - regular clinical visit interval for PSA measurement. The default is 3 months (0.25 years)
   \item \code{cvisit.sd} - standard deviation of variation in the clinical visit time
-  \item \code{sensitivity} - biopsy sensitivity, can be chose from (0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9)
 }}
+
+\item{sensitivity}{biopsy sensitivity, can be chose from (0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9).}
 
 \item{Pcomp}{the compliance rate of PSA measurements. The default value is 1.}
 
@@ -72,7 +74,7 @@ The third dataset contains all the biopsies each patient participated in and has
 }
 \description{
 This function allows you to simulate the outcomes (censoring, progression, early treatment) of patients in AS based on PSA value and baseline age and PSA density. \cr
-In addition to \code{icjmsim()}, this function considers the biopsy sensitivity of 0.5.
+In addition to \code{icjmsim()}, this function considers the biopsy sensitivity (0.6 to 0.9 with a step pf 0.05).
 }
 \details{
 The simulated data are based on seven MCICJMs fitted on the Canary PASS data with fixed biopsy sensitivity ranging from 0.6 to 0.9 (with a step of 0.05). According to the user-specified sensitivity in the above-mentioned range, the following parameters are corresponding chosen \cr
@@ -88,7 +90,7 @@ The simulated data are based on seven MCICJMs fitted on the Canary PASS data wit
 The `true event time` is simulated based on the event-specific hazard and bounded with the observed maximum follow-up time (12.48 yrs) in the PASS data. The `censoring time` follows a uniform distribution with the upper bound as the doubled mean of the observed censoring time in the PASS data.
 }
 \examples{
-mcicjmsim(n = 1e5)
+mcicjmsim(n = 1e5, )
 }
 \keyword{MCICJM}
 \keyword{Simulation}
