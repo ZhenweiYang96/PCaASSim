@@ -90,7 +90,7 @@ The simulated data are based on seven MCICJMs fitted on the Canary PASS data wit
 The `true event time` is simulated based on the event-specific hazard and bounded with the observed maximum follow-up time (12.48 yrs) in the PASS data. The `censoring time` follows a uniform distribution with the upper bound as the doubled mean of the observed censoring time in the PASS data.
 }
 \examples{
-mcicjmsim(n = 1e5, )
+mcicjmsim(n = 1e5, sensitivity = 0.7)
 }
 \keyword{MCICJM}
 \keyword{Simulation}

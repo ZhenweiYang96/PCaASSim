@@ -67,7 +67,7 @@
 #' }
 #' @keywords MCICJM Simulation
 #' @examples
-#' mcicjmsim(n = 1e5, )
+#' mcicjmsim(n = 1e5, sensitivity = 0.7)
 #' @export
 
 
