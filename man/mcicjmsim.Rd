@@ -8,22 +8,10 @@ mcicjmsim(
   n = 1000,
   seed = 100,
   param_list = list(t.max = 12.48, mean.Cens = 5.114849, knot.longi = c(0, 1.36, 2.96,
-    12.48), knot.surv = c(0, 0, 0, 0, 1.05, 1.82, 2.41, 3.13, 3.91, 4.67, 5.56, 6.93,
-    12.48, 12.48, 12.48, 12.48), betas = c(2.356578697, 0.274391033, 0.612221625,
-    0.972303239, 0.016394291), sigma.y = 0.1452828, D_c3 = matrix(c(0.484457235,
-    -0.037087017, -0.08600592, -0.003621471, -0.037087017, 0.779744556, 0.424119912,
-    -0.104367978, -0.08600592, 0.424119912, 1.423327185, 1.474941751, -0.003621471,
-    -0.104367978, 1.474941751, 2.745178027), 
-     4, 4), gambh = matrix(c(-4.554247885,
-    -2.431267662, -0.726208821, -0.295394857, -0.685145348, -1.199522121, -1.701821794,
-    -2.134330688, -2.382277522, -2.512485057, -2.549171766, -2.552028383, -5.259334899,
-    -4.639982156, -4.332605036, -4.38504131, -4.562366014, -4.731760452, -4.892164516,
-    -4.995863325, -5.156619515, -5.356645767, -5.542735349, -5.719399707), 12, 2), gammas
-    = c(0.667693823, 0.239728042), alpha = matrix(c(0.078023016, 2.916081305,
-    0.422728218, 2.131612465), 2, 2), age.mean = -0.1248499, 
-     age.sd = 6.86713,
-    density.mean = -2.272663, density.sd = 0.6042731, cvisit.sep = 0.25, cvisit.sd =
-    0.036, sensitivity = 0.5),
+    12.48), knot.surv = c(0, 0, 0, 0, 1.386667, 2.773333, 4.16, 5.546667, 6.933333, 8.32,
+    9.706667, 11.093333, 12.48, 12.48, 12.48, 12.48), age.mean = -0.1248499, age.sd =
+    6.86713, density.mean = -2.272663, density.sd = 0.6042731, cvisit.sep = 0.25,
+    cvisit.sd = 0.036, sensitivity = 0.6),
   Pcomp = 1,
   Bcomp = 1
 )
@@ -39,19 +27,13 @@ mcicjmsim(
   \item \code{mean.Cens} - mean censoring time in the PASS data
   \item \code{knot.longi} - knots used in the natural cubic spline specification of the longitudinal model
   \item \code{knot.surv} - knots used in the P-splines of the baseline hazard in the survival model
-  \item \code{betas} - coefficients for the fixed effects in the longitudinal submodel for PSA
-  \item \code{sigma.y} - the standard deviation for the residuals in the longitudinal submodel for PSA
-  \item \code{D_c3} - the covariance matrix for the random effects in the longitudinal submodel for PSA
-  \item \code{gambh} - coefficients for the P-spline design matrix of the baseline hazard in the survival submodel
-  \item \code{gammas} - coefficients for the exogenous covariates in the survival submodel;
-  \item \code{alpha} - coefficients for the impact from PSA on the time-to-event outcomes in the survival submodel
   \item \code{age.mean} - mean age observed in the PASS data (centered around 62)
   \item \code{age.sd} - standard deviation of age observed in the PASS data
   \item \code{density.mean} - mean of the PSA density (in log) observed in the PASS data
   \item \code{density.sd} - standard deviation of the PSA density (in log) observed in the PASS data
   \item \code{cvisit.sep} - regular clinical visit interval for PSA measurement. The default is 3 months (0.25 years)
   \item \code{cvisit.sd} - standard deviation of variation in the clinical visit time
-  \item \code{sensitivity} - biopsy sensitivity, set to be 0.5
+  \item \code{sensitivity} - biopsy sensitivity, can be chose from (0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9)
 }}
 
 \item{Pcomp}{the compliance rate of PSA measurements. The default value is 1.}
@@ -93,6 +75,16 @@ This function allows you to simulate the outcomes (censoring, progression, early
 In addition to \code{icjmsim()}, this function considers the biopsy sensitivity of 0.5.
 }
 \details{
+The simulated data are based on seven MCICJMs fitted on the Canary PASS data with fixed biopsy sensitivity ranging from 0.6 to 0.9 (with a step of 0.05). According to the user-specified sensitivity in the above-mentioned range, the following parameters are corresponding chosen \cr
+\loadmathjax
+\itemize{
+  \item \code{betas} - coefficients for the fixed effects in the longitudinal submodel for PSA
+  \item \code{sigma.y} - the standard deviation for the residuals in the longitudinal submodel for PSA
+  \item \code{D_c3} - the covariance matrix for the random effects in the longitudinal submodel for PSA
+  \item \code{gambh} - coefficients for the P-spline design matrix of the baseline hazard in the survival submodel
+  \item \code{gammas} - coefficients for the exogenous covariates in the survival submodel;
+  \item \code{alpha} - coefficients for the impact from PSA on the time-to-event outcomes in the survival submodel
+} \cr
 The `true event time` is simulated based on the event-specific hazard and bounded with the observed maximum follow-up time (12.48 yrs) in the PASS data. The `censoring time` follows a uniform distribution with the upper bound as the doubled mean of the observed censoring time in the PASS data.
 }
 \examples{

@@ -16,23 +16,27 @@
 #'   \item \code{mean.Cens} - mean censoring time in the PASS data
 #'   \item \code{knot.longi} - knots used in the natural cubic spline specification of the longitudinal model
 #'   \item \code{knot.surv} - knots used in the P-splines of the baseline hazard in the survival model
-#'   \item \code{betas} - coefficients for the fixed effects in the longitudinal submodel for PSA
-#'   \item \code{sigma.y} - the standard deviation for the residuals in the longitudinal submodel for PSA
-#'   \item \code{D_c3} - the covariance matrix for the random effects in the longitudinal submodel for PSA
-#'   \item \code{gambh} - coefficients for the P-spline design matrix of the baseline hazard in the survival submodel
-#'   \item \code{gammas} - coefficients for the exogenous covariates in the survival submodel;
-#'   \item \code{alpha} - coefficients for the impact from PSA on the time-to-event outcomes in the survival submodel
 #'   \item \code{age.mean} - mean age observed in the PASS data (centered around 62)
 #'   \item \code{age.sd} - standard deviation of age observed in the PASS data
 #'   \item \code{density.mean} - mean of the PSA density (in log) observed in the PASS data
 #'   \item \code{density.sd} - standard deviation of the PSA density (in log) observed in the PASS data
 #'   \item \code{cvisit.sep} - regular clinical visit interval for PSA measurement. The default is 3 months (0.25 years)
 #'   \item \code{cvisit.sd} - standard deviation of variation in the clinical visit time
-#'   \item \code{sensitivity} - biopsy sensitivity, set to be 0.5
+#'   \item \code{sensitivity} - biopsy sensitivity, can be chose from (0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9)
 #' }
 #' @param Pcomp the compliance rate of PSA measurements. The default value is 1.
 #' @param Bcomp the compliance rate of biopsies. The default value is 1.
-#' @details The `true event time` is simulated based on the event-specific hazard and bounded with the observed maximum follow-up time (12.48 yrs) in the PASS data. The `censoring time` follows a uniform distribution with the upper bound as the doubled mean of the observed censoring time in the PASS data.
+#' @details The simulated data are based on seven MCICJMs fitted on the Canary PASS data with fixed biopsy sensitivity ranging from 0.6 to 0.9 (with a step of 0.05). According to the user-specified sensitivity in the above-mentioned range, the following parameters are corresponding chosen \cr
+#' \loadmathjax
+#' \itemize{
+#'   \item \code{betas} - coefficients for the fixed effects in the longitudinal submodel for PSA
+#'   \item \code{sigma.y} - the standard deviation for the residuals in the longitudinal submodel for PSA
+#'   \item \code{D_c3} - the covariance matrix for the random effects in the longitudinal submodel for PSA
+#'   \item \code{gambh} - coefficients for the P-spline design matrix of the baseline hazard in the survival submodel
+#'   \item \code{gammas} - coefficients for the exogenous covariates in the survival submodel;
+#'   \item \code{alpha} - coefficients for the impact from PSA on the time-to-event outcomes in the survival submodel
+#' } \cr
+#' The `true event time` is simulated based on the event-specific hazard and bounded with the observed maximum follow-up time (12.48 yrs) in the PASS data. The `censoring time` follows a uniform distribution with the upper bound as the doubled mean of the observed censoring time in the PASS data.
 #' @return three datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel). Each datasets contains the following columns: \cr
 #' \loadmathjax
 #' \itemize{
@@ -68,29 +72,103 @@
 
 
 mcicjmsim <- function(n = 1000, seed = 100,
-                    param_list = list(
-                      t.max = 12.48,
-                      mean.Cens = 5.114849,
-                      knot.longi = c(0, 1.36, 2.96, 12.48),
-                      knot.surv = c(0, 0, 0, 0, 1.386667, 2.773333, 4.160000, 5.546667, 6.933333, 8.320000, 9.706667, 11.093333, 12.48, 12.48, 12.48, 12.48),
-                      betas = c(2.356578697, 0.274391033, 0.612221625, 0.972303239, 0.016394291),
-                      sigma.y = 0.1452828,
-                      D_c3 = matrix(c(0.484457235 , -0.037087017, -0.086005920,  -0.003621471,
-                                      -0.037087017, 0.779744556,  0.424119912, -0.104367978,
-                                      -0.086005920,  0.424119912,  1.423327185,  1.474941751,
-                                      -0.003621471, -0.104367978,  1.474941751,  2.745178027), 4, 4),
-                      gambh = matrix(c(-4.554247885, -2.431267662, -0.726208821, -0.295394857, -0.685145348, -1.199522121, -1.701821794, -2.134330688, -2.382277522, -2.512485057, -2.549171766, -2.552028383,
-                                       -5.259334899, -4.639982156, -4.332605036, -4.385041310, -4.562366014, -4.731760452, -4.892164516, -4.995863325, -5.156619515, -5.356645767, -5.542735349, -5.719399707), 12, 2),
-                      gammas = c(0.667693823, 0.239728042),
-                      alpha = matrix(c(0.078023016, 2.916081305, 0.422728218, 2.131612465), 2, 2),
-                      age.mean = -0.1248499,
-                      age.sd = 6.86713,
-                      density.mean = -2.272663,
-                      density.sd = 0.6042731,
-                      cvisit.sep = 0.25,
-                      cvisit.sd = 0.036,
-                      sensitivity = 0.5
-                    ), Pcomp = 1, Bcomp = 1) {
+                      param_list = list(
+                        t.max = 12.48,
+                        mean.Cens = 5.114849,
+                        knot.longi = c(0, 1.36, 2.96, 12.48),
+                        knot.surv = c(0, 0, 0, 0, 1.386667, 2.773333, 4.160000, 5.546667, 6.933333, 8.320000, 9.706667, 11.093333, 12.48, 12.48, 12.48, 12.48),
+                        age.mean = -0.1248499,
+                        age.sd = 6.86713,
+                        density.mean = -2.272663,
+                        density.sd = 0.6042731,
+                        cvisit.sep = 0.25,
+                        cvisit.sd = 0.036,
+                        sensitivity = 0.6
+                      ), Pcomp = 1, Bcomp = 1) {
+
+
+  if (!(param_list$sensitivity %in% seq(0.6, 0.9, 0.05))) {
+    stop("The biopsy sensitivity can only be choosen from {0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9}!")
+  }
+
+  if (param_list$sensitivity == 0.6) {
+    betas = c(2.352129324, 0.272079034, 0.649459222, 1.043220801, 0.015353075)
+    sigma.y = 0.1452562
+    D_c3 = matrix(c(0.487468820 , -0.037135406, -0.082449747,  0.009012073,
+                    -0.037135406, 0.777292878,  0.434979814, -0.089847827,
+                    -0.082449747,  0.434979814,  1.432122696,  1.475295280,
+                    0.009012073, -0.089847827,  1.475295280,  2.709984093), 4, 4)
+    gambh = matrix(c(-2.665400754, -2.271979185, -1.894803896, -1.655702846, -1.641588008, -1.803504514, -2.080335640, -2.423645090, -2.788806058, -3.154227010, -3.537907931, -3.935835573,
+                     -5.203236363, -4.593533092, -4.272369528, -4.336942011, -4.515441308, -4.668240880, -4.776437392, -4.894436058, -5.038643556, -5.232683167, -5.448271313, -5.674776358), 12, 2)
+    gammas = c(0.431700436, 0.245930039)
+    alpha = matrix(c(0.151630901, 1.898640758, 0.398278261, 2.269081065), 2, 2)
+  } else if (param_list$sensitivity == 0.65) {
+    betas = c(2.35916156, 0.28071219, 0.65276735, 1.04312064, 0.01553781)
+    sigma.y = 0.1451515
+    D_c3 = matrix(c(0.48884643 , -0.03559557, -0.08159353,  0.01088569,
+                    -0.03559557, 0.78427933,  0.41951278, -0.11499152,
+                    -0.08159353,  0.41951278,  1.47540723,  1.55584195,
+                    0.01088569, -0.11499152,  1.55584195,  2.86800354), 4, 4)
+    gambh = matrix(c(-2.97732953, -2.55641402, -2.13699510, -1.86784715, -1.84017159, -1.97313631, -2.21714671, -2.50487701, -2.78744611, -3.06344438, -3.32069568, -3.60509819,
+                     -5.25539587, -4.62908939, -4.31838007, -4.38518099, -4.55201518, -4.73041562, -4.87841681, -4.99229966, -5.12067110, -5.28471702, -5.46297205, -5.65432410), 12, 2)
+    gammas = c(0.38845430, 0.23130498)
+    alpha = matrix(c(0.18026827, 1.88920829, 0.40362622, 2.30624195), 2, 2)
+  } else if (param_list$sensitivity == 0.7) {
+    betas = c(2.34896747, 0.26474019, 0.61614647, 0.98789633, 0.01823955)
+    sigma.y = 0.1453678
+    D_c3 = matrix(c(0.48696044 , -0.04170548, -0.07496125,  0.02288856,
+                    -0.04170548, 0.77123411,  0.45075706, -0.05867300,
+                    -0.07496125,  0.45075706,  1.35408590,  1.33532107,
+                    0.02288856, -0.05867300,  1.33532107,  2.45698367), 4, 4)
+    gambh = matrix(c(-2.95256480, -2.53111603, -2.13401507, -1.84315853, -1.76027260, -1.85808493, -2.09596824, -2.35593965, -2.62545995, -2.87886429, -3.13594218, -3.38983808,
+                     -5.21628282, -4.58699991, -4.29018145, -4.34477514, -4.51164100, -4.67731307, -4.80494661, -4.90464411, -5.04741293, -5.26605583, -5.47555666, -5.68352060), 12, 2)
+    gammas = c(0.41174044, 0.24861549)
+    alpha = matrix(c(0.16779912, 1.80523286, 0.40977825, 2.20759527), 2, 2)
+  } else if (param_list$sensitivity == 0.75) {
+    betas = c(2.353551638, 0.269237668, 0.623986138, 1.002590218, 0.015519893)
+    sigma.y = 0.1452596
+    D_c3 = matrix(c(0.487678959 , -0.036874777, -0.089776421,  -0.003862647,
+                    -0.036874777, 0.773825259,  0.432616283, -0.084097818,
+                    -0.089776421,  0.432616283,  1.413729969,  1.426883734,
+                    -0.003862647, -0.084097818,  1.426883734,  2.595005578), 4, 4)
+    gambh = matrix(c(-3.022865564, -2.574942908, -2.165002586, -1.868394333, -1.780851418, -1.866034743, -2.043196689, -2.260330582, -2.506676980, -2.740856927, -2.954514094, -3.146719267,
+                     -5.128957296, -4.551501961, -4.263715050, -4.308050583, -4.474338093, -4.645207487, -4.802948164, -4.912553004, -5.113348423, -5.372396769, -5.660759223, -5.967330241), 12, 2)
+    gammas = c(0.414315298, 0.251801149)
+    alpha = matrix(c(0.162897891, 1.788904469, 0.399214083, 2.222056696), 2, 2)
+  } else if (param_list$sensitivity == 0.8) {
+    betas = c(2.356588481, 0.272948830, 0.644815621, 1.033282724, 0.016234042)
+    sigma.y = 0.1452074
+    D_c3 = matrix(c(0.486820011 , -0.038621202, -0.082794049,  0.008926739,
+                    -0.038621202, 0.770276184,  0.440816481, -0.084097818,
+                    -0.082794049,  0.440816481,  1.420830851,  1.446250164,
+                    0.008926739, -0.084097818,  1.446250164,  2.644159252), 4, 4)
+    gambh = matrix(c(-3.165103149, -2.769622909, -2.370050023, -2.069669115, -1.926431838, -1.955697588, -2.122101152, -2.371421927, -2.609462994, -2.851727184, -3.087294192, -3.325937065,
+                     -5.360538803, -4.713752544, -4.378904766, -4.434691999, -4.627262507, -4.800936028, -4.961507735, -5.075348794, -5.217484592, -5.426660617, -5.628647195, -5.812534988), 12, 2)
+    gammas = c(0.385386823, 0.220831854)
+    alpha = matrix(c(0.188245170, 1.748985371, 0.423016178, 2.261760329), 2, 2)
+  } else if (param_list$sensitivity == 0.85) {
+    betas = c(2.352953430, 0.275257794, 0.597686113, 0.944273172, 0.016290199)
+    sigma.y = 0.1452433
+    D_c3 = matrix(c(0.488642352 , -0.036540460, -0.092497113,  -0.009357853,
+                    -0.036540460, 0.776358730,  0.421805357, -0.110353303,
+                    -0.092497113,  0.421805357,  1.447349602,  1.509494709,
+                    -0.009357853, -0.110353303,  1.509494709,  2.782744172), 4, 4)
+    gambh = matrix(c(-3.226348200, -2.759855160, -2.326239353, -1.990560306, -1.865688229, -1.877771556, -2.032542847, -2.273768270, -2.531882698, -2.829122059, -3.114709292, -3.380424364,
+                     -5.408805589, -4.792106879, -4.487409068, -4.549508620, -4.729942716, -4.883242980, -5.024760368, -5.148596877, -5.323965018, -5.529580632, -5.754638580, -5.971977563), 12, 2)
+    gammas = c(0.404188401, 0.202586480)
+    alpha = matrix(c(0.169192069, 1.761858497, 0.449120817, 2.173414918), 2, 2)
+  } else if (param_list$sensitivity == 0.9) {
+    betas = c(2.353453856, 0.277881395, 0.644051169, 1.021577864, 0.014977841)
+    sigma.y = 0.1452473
+    D_c3 = matrix(c(0.487862642 , -0.038482497, -0.085932777,  -0.009357853,
+                    -0.038482497, 0.767263971,  0.442514087, -0.064342839,
+                    -0.085932777,  0.442514087,  1.471572079,  1.504941133,
+                    -0.009357853, -0.064342839,  1.504941133,  2.699179164), 4, 4)
+    gambh = matrix(c(-3.254276234, -2.803285544, -2.357368545, -2.015589272, -1.854142561, -1.858645160, -1.979729984, -2.211776079, -2.492273565, -2.777049276, -3.067553623, -3.349756364,
+                     -5.321748676, -4.713794514, -4.401910430, -4.464901247, -4.634442679, -4.787715027, -4.946660705, -5.070132506, -5.250413918, -5.497500996, -5.745547531, -5.955826158), 12, 2)
+    gammas = c(0.406758832, 0.217842503)
+    alpha = matrix(c(0.161481731, 1.754116382, 0.422726916, 2.288462247), 2, 2)
+  }
 
   # Preparation
   f.org <- JMbayes:::gaussKronrod()$sk
@@ -102,14 +180,14 @@ mcicjmsim <- function(n = 1000, seed = 100,
 
   # Parameters
   t.max <- param_list$t.max
-  betas <- param_list$betas
-  sigma.y <- param_list$sigma.y
-  gammas <- param_list$gammas
-  alpha <- param_list$alpha
-  gambh <- param_list$gambh
+  # betas <- param_list$betas
+  # sigma.y <- param_list$sigma.y
+  # gammas <- param_list$gammas
+  # alpha <- param_list$alpha
+  # gambh <- param_list$gambh
   mean.Cens <- param_list$mean.Cens
   Bsens <- param_list$sensitivity
-  V <- param_list$D_c3
+  V <-  D_c3 #param_list$
   V <- nearPD(V)$mat
   D <- V
 
