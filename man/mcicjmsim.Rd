@@ -12,7 +12,9 @@ mcicjmsim(
     9.706667, 11.093333, 12.48, 12.48, 12.48, 12.48), age.mean = -0.1248499, age.sd =
     6.86713, density.mean = -2.272663, density.sd = 0.6042731, cvisit.sep = 0.25,
     cvisit.sd = 0.036),
-  sensitivity = 0.6,
+  sens_fit = 0.6,
+  sens_sim = NULL,
+  sched_sim = "PASS",
   Pcomp = 1,
   Bcomp = 1
 )
@@ -36,7 +38,11 @@ mcicjmsim(
   \item \code{cvisit.sd} - standard deviation of variation in the clinical visit time
 }}
 
-\item{sensitivity}{biopsy sensitivity, can be chose from (0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9).}
+\item{sens_fit}{biopsy sensitivity used to generate the underlying event times. This value can be chose from (0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9).}
+
+\item{sens_sim}{biopsy sensitivity used to generate the biopsy time in the simulated dataset. The default value is the same as `sens_fit`.}
+
+\item{sched_sim}{the biopsy schedule implemented in the simulated dataset, can be chosen from \{"PASS" (PASS protocol), "yearly" (yearly biopsies), "biyearly" (biennial biopsies), "triyearly" (triennial biopsies)\}.}
 
 \item{Pcomp}{the compliance rate of PSA measurements. The default value is 1.}
 
@@ -87,10 +93,11 @@ The simulated data are based on seven MCICJMs fitted on the Canary PASS data wit
   \item \code{gammas} - coefficients for the exogenous covariates in the survival submodel;
   \item \code{alpha} - coefficients for the impact from PSA on the time-to-event outcomes in the survival submodel
 } \cr
-The `true event time` is simulated based on the event-specific hazard and bounded with the observed maximum follow-up time (12.48 yrs) in the PASS data. The `censoring time` follows a uniform distribution with the upper bound as the doubled mean of the observed censoring time in the PASS data.
+The `true event time` is simulated based on the event-specific hazard and bounded with the observed maximum follow-up time (12.48 yrs) in the PASS data. The `censoring time` follows a uniform distribution with the upper bound as the doubled mean of the observed censoring time in the PASS data. \cr
+This function also allows to simulate datasets with newly-specified biopsy sensitivity and different biopsy schedules from the PASS data.
 }
 \examples{
-mcicjmsim(n = 1e5, sensitivity = 0.7)
+mcicjmsim(n = 1e5, sens_fit = 0.7)
 }
 \keyword{MCICJM}
 \keyword{Simulation}
