@@ -374,7 +374,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
     dat.cmpl$b1 <- b[id,1]
     dat.cmpl$b2 <- b[id,2]
     dat.cmpl$b3 <- b[id,3]
-    dat.cmpl$b4 <- b[id]
+    dat.cmpl$b4 <- b[id,4]
     dat.cmpl$time.prg <- Time.prg[id]
     dat.cmpl$time.trt <- Time.trt[id]
     dat.cmpl$time.cen <- Time.cen[id]
