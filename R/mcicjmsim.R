@@ -364,20 +364,20 @@ mcicjmsim <- function(n = 1000, seed = 100,
 
   if (keep_complete) {
     dat.cmpl <- DF
-    dat.cmpl$CISNET_ID <- id.obs
+    dat.cmpl$CISNET_ID <- id
     dat.cmpl$PSAValue <- y
 
-    dat.cmpl$time.cmp1 <- Time1[id.obs]
-    dat.cmpl$time.cmp2 <- Time2[id.obs]
-    dat.cmpl$time <- Time[id.obs]
-    dat.cmpl$status.cmp <- event[id.obs]
-    dat.cmpl$b1 <- b[id.obs,1]
-    dat.cmpl$b2 <- b[id.obs,2]
-    dat.cmpl$b3 <- b[id.obs,3]
-    dat.cmpl$b4 <- b[id.obs,4]
-    dat.cmpl$time.prg <- Time.prg[id.obs]
-    dat.cmpl$time.trt <- Time.trt[id.obs]
-    dat.cmpl$time.cen <- Time.cen[id.obs]
+    dat.cmpl$time.cmp1 <- Time1[id]
+    dat.cmpl$time.cmp2 <- Time2[id]
+    dat.cmpl$time <- Time[id]
+    dat.cmpl$status.cmp <- event[id]
+    dat.cmpl$b1 <- b[id,1]
+    dat.cmpl$b2 <- b[id,2]
+    dat.cmpl$b3 <- b[id,3]
+    dat.cmpl$b4 <- b[id]
+    dat.cmpl$time.prg <- Time.prg[id]
+    dat.cmpl$time.trt <- Time.trt[id]
+    dat.cmpl$time.cen <- Time.cen[id]
     dat.cmpl <- dat.cmpl[c("CISNET_ID", "TimeSince_Dx", "PSAValue", "time", "time.cmp1",
                            "time.cmp2","status.cmp", "density","DxAge",
                            "b1", "b2", "b3", "b4", "time.prg", "time.trt", "time.cen")]
