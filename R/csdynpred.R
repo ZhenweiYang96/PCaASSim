@@ -64,6 +64,7 @@
 #' @export
 
 csdypred <- function(sens_fit = 0.6,
+                     model = NULL,
                      t_start = 0,
                      t_visits = NULL,
                      n.step = 50L,
@@ -90,7 +91,12 @@ csdypred <- function(sens_fit = 0.6,
     stop("Dynamic predictions can be generated for only one patient at a time.\n")
   }
 
-  object <- get(paste0("mcicjm.model.", sens_fit*100))
+  if (is.null(model)) {
+    object <- get(paste0("mcicjm.model.", sens_fit*100))
+  } else {
+    object <- model
+  }
+
 
   Survtimes <- sort(c(t_visits,
                       seq(t_start, max(t_visits), length.out = n.step)))
