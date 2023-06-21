@@ -9,6 +9,7 @@
 #' @import rjags
 #' @import mathjaxr
 #' @param sens_fit the sensitivity parameter assumed in the MCICJM fitted on the training (PASS) data. The default value is 0.6.
+#' @param model the self-fitted MCICJM model. If not specified, the default fitted MCICJMs (according to sensitivity) is used.
 #' @param t_start the start time point (in years) to predict, e.g., usually the last biopsy. The default value is 0.
 #' @param t_visits the time point(s) of clinical visit, whose risks are of interest. \
 #' @param n.step the interval of each point estimates. The default value is 50.

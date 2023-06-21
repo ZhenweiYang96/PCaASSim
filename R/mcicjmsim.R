@@ -28,6 +28,7 @@
 #' @param sched_sim the biopsy schedule implemented in the simulated dataset, can be chosen from \{"PASS" (PASS protocol), "yearly" (yearly biopsies), "biyearly" (biennial biopsies), "triyearly" (triennial biopsies)\}.
 #' @param Pcomp the compliance rate of PSA measurements. The default value is 1.
 #' @param Bcomp the compliance rate of biopsies. The default value is 1.
+#' @param keep_complete also keep the complete datasets (PSA after event occurrence).
 #' @details The simulated data are based on seven MCICJMs fitted on the Canary PASS data with fixed biopsy sensitivity ranging from 0.6 to 0.9 (with a step of 0.05). According to the user-specified sensitivity in the above-mentioned range, the following parameters are corresponding chosen \cr
 #' \loadmathjax
 #' \itemize{
@@ -88,7 +89,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
                         cvisit.sd = 0.036
                       ), sens_fit = 0.6, sens_sim = NULL,
                       sched_sim = "PASS",
-                      Pcomp = 1, Bcomp = 1) {
+                      Pcomp = 1, Bcomp = 1, keep_complete = F) {
 
 
   if (!(sens_fit %in% seq(0.6, 0.9, 0.05))) {
@@ -363,7 +364,32 @@ mcicjmsim <- function(n = 1000, seed = 100,
 
   biopsy <- biopsy_full[biopsy_full$compliance & biopsy_full$TimeSince_Dx <= biopsy_full$time.cmp2, ]
 
-  return(list(dat = dat,
-              dat.id = dat.id,
-              biopsy = biopsy))
+  if (keep_complete) {
+    dat.cmpl <- DF
+    dat.cmpl$CISNET_ID <- id
+    dat.cmpl$PSAValue <- y
+
+    dat.cmpl$time.cmp1 <- Time1[id]
+    dat.cmpl$time.cmp2 <- Time2[id]
+    dat.cmpl$time <- Time[id]
+    dat.cmpl$status.cmp <- event[id]
+    dat.cmpl$b1 <- b[id,1]
+    dat.cmpl$b2 <- b[id,2]
+    dat.cmpl$b3 <- b[id,3]
+    dat.cmpl$b4 <- b[id,4]
+    dat.cmpl$time.prg <- Time.prg[id]
+    dat.cmpl$time.trt <- Time.trt[id]
+    dat.cmpl$time.cen <- Time.cen[id]
+    dat.cmpl <- dat.cmpl[c("CISNET_ID", "TimeSince_Dx", "PSAValue", "time", "time.cmp1",
+                           "time.cmp2","status.cmp", "density","DxAge",
+                           "b1", "b2", "b3", "b4", "time.prg", "time.trt", "time.cen")]
+    return(list(dat = dat,
+                dat.cmpl = dat.cmpl,
+                dat.id = dat.id,
+                biopsy = biopsy))
+  } else {
+    return(list(dat = dat,
+                dat.id = dat.id,
+                biopsy = biopsy))
+  }
 }

@@ -16,7 +16,8 @@ mcicjmsim(
   sens_sim = NULL,
   sched_sim = "PASS",
   Pcomp = 1,
-  Bcomp = 1
+  Bcomp = 1,
+  keep_complete = F
 )
 }
 \arguments{
@@ -47,6 +48,8 @@ mcicjmsim(
 \item{Pcomp}{the compliance rate of PSA measurements. The default value is 1.}
 
 \item{Bcomp}{the compliance rate of biopsies. The default value is 1.}
+
+\item{keep_complete}{also keep the complete datasets (PSA after event occurrence).}
 }
 \value{
 three datasets. First dataset records all the longitudinal measurements (used in the longitudinal submodel), second records each subject per row (used in the survival submodel). Each datasets contains the following columns: \cr

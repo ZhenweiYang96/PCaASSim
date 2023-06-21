@@ -6,6 +6,7 @@
 \usage{
 csdypred(
   sens_fit = 0.6,
+  model = NULL,
   t_start = 0,
   t_visits = NULL,
   n.step = 50L,
@@ -22,6 +23,8 @@ csdypred(
 }
 \arguments{
 \item{sens_fit}{the sensitivity parameter assumed in the MCICJM fitted on the training (PASS) data. The default value is 0.6.}
+
+\item{model}{the self-fitted MCICJM model. If not specified, the default fitted MCICJMs (according to sensitivity) is used.}
 
 \item{t_start}{the start time point (in years) to predict, e.g., usually the last biopsy. The default value is 0.}
 
