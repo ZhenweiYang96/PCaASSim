@@ -88,7 +88,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
                         cvisit.sep = 0.25,
                         cvisit.sd = 0.036
                       ), sens_fit = 0.6, sens_sim = NULL,
-                      sched_sim = "PASS",
+                      sched_sim = "PASS", selfdefsched_code = NULL,
                       Pcomp = 1, Bcomp = 1, keep_complete = F) {
 
 
@@ -98,8 +98,8 @@ mcicjmsim <- function(n = 1000, seed = 100,
 
   sens_sim <- ifelse(is.na(sens_sim), sens_fit, sens_sim)
 
-  if (!(sched_sim %in% c("PASS", "yearly", "biyearly", "triyearly", "biannual"))) {
-    stop("The biopsy schedule in the simulated dataset should be chosen from 'PASS', 'biannual', 'yearly', 'biyearly' or 'triyearly'!")
+  if (!(sched_sim %in% c("PASS", "yearly", "biyearly", "triyearly", "biannual", "other"))) {
+    stop("The biopsy schedule in the simulated dataset should be chosen from 'PASS', 'biannual', 'yearly', 'biyearly', 'triyearly', 'other'!")
   }
 
   if (sens_fit == 0.6) {
@@ -275,6 +275,8 @@ mcicjmsim <- function(n = 1000, seed = 100,
     fv_idx <- seq(1, K, 12)
   } else if (sched_sim == "biannual") {
     fv_idx <- seq(1, K, 2)
+  } else if (sched_sim == "other") {
+    fv_idx <- eval(parse(text = selfdefsched_code))
   }
 
   if (K %in% fv_idx) {
