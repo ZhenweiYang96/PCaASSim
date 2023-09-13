@@ -1,7 +1,9 @@
 #' A dynamic prediction for cancer progression based on MCICJM also incorporating sensitivity
 #'
-#' This function allows you to predict patient-specific risk of cancer progression based on the fitted MCICJM with a given sensitivity parameter. \cr
-#' The prediction can be dynamically updated with new PSA values. The sensitivity parameter can be chosen from \{0.6, 0.65, 0.7, 0.75. 0.8, 0.85, 0.9\}.
+#' This function allows you to predict patient-specific risk of cancer progression based on the fitted MCICJM given a certain sensitivity value (or a sensitivity prior). \cr
+#' The risk refers to \loadmathjax \mjdeqn{\Pr(T^*_i = T^{\small{prg},*}_i < t^{(p)} \mid T^{\small{prg}+}_i > t^{(b)})}{ASCII representation}
+#' The prediction can be dynamically updated with new PSA values.
+#'
 #' @import splines
 #' @import mvtnorm
 #' @import MASS
@@ -9,7 +11,9 @@
 #' @import rjags
 #' @import mathjaxr
 #' @param sens_fit the sensitivity parameter assumed in the MCICJM fitted on the training (PASS) data. The default value is 0.6.
+#' @param sens_pred the fixed sensitivity value used in the prediction. If not specified, will automatically extract the value from posterior distribution of the sens parameter from the fitted model.
 #' @param model the self-fitted MCICJM model. If not specified, the default fitted MCICJMs (according to sensitivity) is used.
+#' @param t_biopsies the times of prior biopsies (excluding the one at year 0, the start of active surveillance).
 #' @param t_start the start time point (in years) to predict, e.g., usually the last biopsy. The default value is 0.
 #' @param t_visits the time point(s) of clinical visit, whose risks are of interest. \
 #' @param n.step the interval of each point estimates. The default value is 50.
@@ -41,6 +45,12 @@
 #'    \item \code{upper} - lower bound of the 95\% credible interval.
 #'  } \cr
 #'  \item \code{risk} - the risk estimates (with uncertainty) of all time points. This can be used to draw a risk curve.
+#'  \item \code{priorbiopsy_info} - a list includes two tables:
+#'  \loadmathjax
+#'  \itemize{
+#'    \item \code{priorbsp.risk} - risk estimates for each prior biopsy intervals (rows = iterations, cols = biopsy intervals)
+#'    \item \code{baseline.bp.risk} - the offsets of the risks attributed from the biopsy sensitivity in all iterations
+#'  } \cr
 #'  \item \code{longi} - the estimated PSA trajectory (with uncertainty).
 #'  \item \code{acc} - the acceptance rate in the Robbins-Monro process. This is used to check convergence.
 #'  \item \code{surv} - the vector of survival probability until \code{t_start}.
@@ -53,7 +63,8 @@
 #'    \item \code{gamma} - the coefficient of the baseline covariate (PSA density) in the survival submodel
 #'    \item \code{alpha} - the association parameters of PSA in different functional forms
 #'    \item \code{Sigma} - the variance covariance matrix of the random effects in the longitudinal submodel
-#'    \item \code{tau} - the inverse of the residuals variance in the longitudinal submodel.
+#'    \item \code{tau} - the inverse of the residuals variance in the longitudinal submodel
+#'    \item \code{sens} - the sensitivity parameter used in each iteration, either fixed or sampled from posterior
 #'  } \cr
 #'  \item \code{inits} - the initial values for \mjeqn{\sigma}{ASCII representation} and \mjeqn{\Sigma}{ASCII representation} matrix in the Robbins-Monro process.
 #'  \item \code{overall.surv} - a table of the estimates overall survival probabilities at all time points.
@@ -61,28 +72,27 @@
 #' }
 #' @keywords Dynamic prediction
 #' @examples
-#' csdypred_sens(sens_fit = 0.6, t_start = 0, t_visits = c(1, 2, 4, 6), newdata = test)
+#' csdypred_sens(sens_pred = 0.8, model = mcicjm, t_biopsy = 1:2, t_start = 2, t_visits = c(1, 2, 4, 6), newdata = test)
 #' @export
 
 csdypred_sens <- function(sens_fit = 0.6,
-                     sens_pred = NULL,
-                     model = NULL,
-                     t_biopsies = NULL,
-                     t_start = 0,
-                     t_visits = NULL,
-                     n.step = 50L,
-                     n.step.past = 20L,
-                     iter = 250L, n.adapt = 150L,
-                     seed = 100L,
-                     idVar = "CISNET_ID",
-                     varname = list(longitimeVar = NULL,
-                                    #survtimeVar = NULL,
-                                    longi.bsVar = NULL,
-                                    surv.bsVar = NULL),
-                     newdata,
-                     sigma.inits = 0.27,
-                     sigMat.inits = NULL,
-                     qp = 15) {
+                          sens_pred = NULL,
+                          model = NULL,
+                          t_biopsies = NULL,
+                          t_start = 0,
+                          t_visits = NULL,
+                          n.step = 50L,
+                          iter = 250L, n.adapt = 150L,
+                          seed = 100L,
+                          idVar = "CISNET_ID",
+                          varname = list(longitimeVar = NULL,
+                                         #survtimeVar = NULL,
+                                         longi.bsVar = NULL,
+                                         surv.bsVar = NULL),
+                          newdata,
+                          sigma.inits = 0.27,
+                          sigMat.inits = NULL,
+                          qp = 15) {
   if (is.null(newdata)) {
     stop("Test set is missing! \n")
   }
@@ -206,6 +216,8 @@ csdypred_sens <- function(sens_fit = 0.6,
 
   # risk store set
   risk.store <- matrix(NA, iter, length(step))
+  numerator.risk.store <- matrix(NA, iter, length(step))
+  denomiator.risks.store <- matrix(NA, iter, length(step))
 
   # sample
   set.seed(seed)
@@ -671,8 +683,14 @@ csdypred_sens <- function(sens_fit = 0.6,
                               alpha[j,2,1] * (XL.h.now[1:qp,] %*% beta[j,] + ZL.h.now[1:qp,] %*% b[j,] -
                                                 XL.h.back[1:qp,] %*% beta[j,] - ZL.h.back[1:qp,] %*% b[j,]))
     }
-    risk.store[1:iter,i] <- (baseline.bp.risk[1:iter] + (u-t)/2 * ((hazard[1:iter,] * survival[1:iter,]) %*% w)) /
-      c(surv[1:iter] + baseline.bp.risk[1:iter])
+    if (i==1) {
+      risk.store[1:iter,i] <- (baseline.bp.risk[1:iter] + (u-t)/2 * ((hazard[1:iter,] * survival[1:iter,]) %*% w)) /
+        c(surv[1:iter] + baseline.bp.risk[1:iter])
+    } else {
+      risk.store[1:iter,i] <- (u-t)/2 * ((hazard[1:iter,] * survival[1:iter,]) %*% w) /
+        c(surv[1:iter])
+    }
+
 
     overall.surv[1:iter,i] <- exp(- u/2 * (hazard.overall.survival[1:iter,,1] %*% w +
                                              hazard.overall.survival[1:iter,,2] %*% w))

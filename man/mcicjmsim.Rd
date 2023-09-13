@@ -15,6 +15,7 @@ mcicjmsim(
   sens_fit = 0.6,
   sens_sim = NULL,
   sched_sim = "PASS",
+  selfdefsched_code = NULL,
   Pcomp = 1,
   Bcomp = 1,
   keep_complete = F
