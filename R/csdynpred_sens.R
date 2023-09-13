@@ -61,10 +61,10 @@
 #' }
 #' @keywords Dynamic prediction
 #' @examples
-#' csdypred(sens_fit = 0.6, t_start = 0, t_visits = c(1, 2, 4, 6), newdata = test)
+#' csdypred_sens(sens_fit = 0.6, t_start = 0, t_visits = c(1, 2, 4, 6), newdata = test)
 #' @export
 
-csdypred <- function(sens_fit = 0.6,
+csdypred_sens <- function(sens_fit = 0.6,
                      sens_pred = NULL,
                      model = NULL,
                      t_biopsies = NULL,
