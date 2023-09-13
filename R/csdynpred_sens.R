@@ -180,7 +180,7 @@ csdypred_sens <- function(sens_fit = 0.6,
                        varname$surv.bsVar)
 
   # preparation for sample from posterior distribution
-  step <- Survtimes[[length(Survtimes)]]
+  step <- Survtimes
   total <- iter
 
   beta <- matrix(NA, total, ncol(pool.beta))
@@ -706,6 +706,5 @@ csdypred_sens <- function(sens_fit = 0.6,
                                 sens = sens),
               inits = list(sigma = sigma, sigMat = sigMat),
               overall.surv = overall.surv,
-              full.results = full.results,
-              Survtimes = Survtimes))
+              full.results = full.results))
 }
