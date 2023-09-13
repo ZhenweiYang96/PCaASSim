@@ -34,10 +34,24 @@ extract_pd <- function(object = NULL, sample_pool_size = 500) {
   pool.tau <- do.call("c", lapply(object, function(x) {x[idx_pd,
                                                          grep("tau", col.name)]}))
 
-  return(list(pool.bs_gammas = pool.bs_gammas,
-              pool.gammas = pool.gammas,
-              pool.alphas = pool.alphas,
-              pool.beta = pool.beta,
-              pool.D = pool.D,
-              pool.tau = pool.tau))
+  if (any(col.name == "sens")) {
+    pool.sens <- do.call("c", lapply(object, function(x) {x[idx_pd,
+                                                           grep("sens", col.name)]}))
+    return(list(pool.bs_gammas = pool.bs_gammas,
+                pool.gammas = pool.gammas,
+                pool.alphas = pool.alphas,
+                pool.beta = pool.beta,
+                pool.D = pool.D,
+                pool.tau = pool.tau,
+                pool.sens = pool.sens))
+  } else {
+    return(list(pool.bs_gammas = pool.bs_gammas,
+                pool.gammas = pool.gammas,
+                pool.alphas = pool.alphas,
+                pool.beta = pool.beta,
+                pool.D = pool.D,
+                pool.tau = pool.tau))
+  }
+
+
 }

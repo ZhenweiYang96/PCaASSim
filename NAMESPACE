@@ -1,6 +1,7 @@
 export(icjmsim)
 export(mcicjmsim)
 export(csdypred)
+export(csdypred_sens)
 exportPattern("PCaASSim")
 import(MASS)
 import(Matrix)
