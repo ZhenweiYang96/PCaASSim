@@ -702,8 +702,10 @@ csdypred_sens <- function(sens_fit = 0.6,
                                 gamma = gamma,
                                 alpha = alpha,
                                 Sigma = Sigma,
-                                tau = tau),
+                                tau = tau,
+                                sens = sens),
               inits = list(sigma = sigma, sigMat = sigMat),
               overall.surv = overall.surv,
-              full.results = full.results))
+              full.results = full.results,
+              Survtimes = Survtimes))
 }
