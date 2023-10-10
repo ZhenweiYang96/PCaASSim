@@ -96,7 +96,7 @@ mcicjmsim <- function(n = 1000, seed = 100,
     stop("The biopsy sensitivity used to simulate the event time can only be choosen from {0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9}!")
   }
 
-  sens_sim <- ifelse(is.na(sens_sim), sens_fit, sens_sim)
+  sens_sim <- ifelse(is.null(sens_sim), sens_fit, sens_sim)
 
   if (!(sched_sim %in% c("PASS", "yearly", "biyearly", "triyearly", "biannual", "other"))) {
     stop("The biopsy schedule in the simulated dataset should be chosen from 'PASS', 'biannual', 'yearly', 'biyearly', 'triyearly', 'other'!")
